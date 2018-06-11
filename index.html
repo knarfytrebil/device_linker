@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="theme-color" content="#000000">
+        <title>Device Binder</title>
+    </head>
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ethjs@0.3.4/dist/ethjs.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="crossorigin="anonymous"> </script>
+
+    <script type="text/javascript">
+    var CONTRACT_ADDR = "0xBa026D4996762C88410b8Cf0d246d0FAe860F842"
+    var CONTRACT_ABI = [{"constant":true,"inputs":[{"name":"_addr","type":"address"}],"name":"getPublicKey","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_publickey","type":"string"}],"name":"getAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_publickey","type":"string"}],"name":"link","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+    var CONTRACT_BYTE_CODE = "608060405234801561001057600080fd5b50610491806100206000396000f3006080604052600436106100565763ffffffff7c0100000000000000000000000000000000000000000000000000000000600035041663857cdbb8811461005b578063bf40fac1146100fe578063cf2e011e14610180575b600080fd5b34801561006757600080fd5b5061008973ffffffffffffffffffffffffffffffffffffffff600435166101db565b6040805160208082528351818301528351919283929083019185019080838360005b838110156100c35781810151838201526020016100ab565b50505050905090810190601f1680156100f05780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561010a57600080fd5b506040805160206004803580820135601f81018490048402850184019095528484526101579436949293602493928401919081908401838280828437509497506102919650505050505050565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561018c57600080fd5b506040805160206004803580820135601f81018490048402850184019095528484526101d994369492936024939284019190819084018382808284375094975061030f9650505050505050565b005b73ffffffffffffffffffffffffffffffffffffffff81166000908152602081815260409182902080548351601f60026000196101006001861615020190931692909204918201849004840281018401909452808452606093928301828280156102855780601f1061025a57610100808354040283529160200191610285565b820191906000526020600020905b81548152906001019060200180831161026857829003601f168201915b50505050509050919050565b60006001826040518082805190602001908083835b602083106102c55780518252601f1990920191602091820191016102a6565b51815160209384036101000a600019018019909216911617905292019485525060405193849003019092205473ffffffffffffffffffffffffffffffffffffffff16949350505050565b33600090815260208181526040909120825161032d928401906103ca565b50336001826040518082805190602001908083835b602083106103615780518252601f199092019160209182019101610342565b51815160209384036101000a60001901801990921691161790529201948552506040519384900301909220805473ffffffffffffffffffffffffffffffffffffffff191673ffffffffffffffffffffffffffffffffffffffff9490941693909317909255505050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061040b57805160ff1916838001178555610438565b82800160010185558215610438579182015b8281111561043857825182559160200191906001019061041d565b50610444929150610448565b5090565b61046291905b80821115610444576000815560010161044e565b905600a165627a7a72305820beaeeccf5aad21d8cef1155888cf812843f55de65f4ec2777e0f92e5832316010029"
+
+    var PUBLIC_KEY = $(location).attr("hash").slice(1);
+    window.addEventListener('load', function() {
+        $("#head").text(PUBLIC_KEY.slice(2,6));
+        $("#tail").text(PUBLIC_KEY.slice(-4));
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        if (typeof web3 !== 'undefined') {
+            // Use Mist/MetaMask's provider
+            console.log("Found web3, let's go.")
+            startApp(web3)
+        } else {
+            console.log('No web3? You should consider trying MetaMask!')
+        }
+    });
+
+    function startApp(web3) {
+        let eth = new Eth(web3.currentProvider);
+        eth.accounts().then(function(accounts) {
+            let contract = eth.contract(CONTRACT_ABI, CONTRACT_BYTE_CODE, { from: accounts[0], gas: 300000 }).at(CONTRACT_ADDR);
+            $('.button').on({ 'touchstart' : function(){ 
+                contract.link(PUBLIC_KEY).then(()=>{
+                    console.log('done')
+                });
+            }});
+        });
+    }
+    </script>
+    <body>
+        <noscript> You need to enable JavaScript to run this app. </noscript>
+        <div class="main">
+            <div class="words"> 
+                <h2> Congrats!</h2>
+                <b>QR Code</b> scan succeed. </br>
+                Please click the button to bind. </br> </br>
+                Your <b>device ID</b> : </br></br>
+                <h3 class='device_id'>
+                    <b class='gray'>0x</b> 
+                    <b id="head">2323</b> ・ <b id="tail">23df</b>
+                </h3>
+            </div>
+            <div class="button">Bind Device</div>
+        </div>
+
+    </body>
+
+    <style type="text/css">
+        html, body { font-family: 'Oswald', sans-serif; height: 100%; }
+        body { margin: 0; }
+        b.gray { color: gray; }
+        .device_id { 
+            text-align: center; 
+            border: 1px dashed gray;
+        }
+        .main { height: 100%; }
+        .main .words { padding: 10% 10% 0 10% ; font-size: 1.2rem; }
+        .main .button {
+            font-size: 1.4rem;
+            bottom: calc(20% - 35px);
+            left: calc(50% - 70px);
+            display: inline-block;
+            border: 1px black solid;
+            position: fixed;
+            padding: 20px;
+            color: white;
+            background-color: black;
+            box-shadow: 2px 2px 3px grey;
+            border-radius: 5px;
+        }       
+    </style>
+</html>
