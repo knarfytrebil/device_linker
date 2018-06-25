@@ -20,4 +20,4 @@ jobs:
             sudo python3 get-pip.py
             sudo pip3 install awscli --upgrade
             ls -ahl
-            aws s3 sync src s3://staging-device-linker --delete
+            aws s3 sync src s3://staging-device-linker.triglyceri.de --delete
