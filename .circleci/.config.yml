@@ -1,0 +1,23 @@
+# Javascript Node CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+
+version: 2
+jobs:
+  deploy:
+    docker:
+      - image: circleci/python:3
+
+    working_directory: ~/device-linker
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies and upload to s3
+          working_directory: ~/device-linker
+          command: |
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            sudo python3 get-pip.py
+            sudo pip3 install awscli --upgrade
+            ls -ahl
+            aws s3 sync src s3://staging-device-linker --delete
